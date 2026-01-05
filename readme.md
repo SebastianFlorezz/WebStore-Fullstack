@@ -15,3 +15,6 @@
     -Express
     -Nodemon
     -Dotenv
+    -Prisma
+    -Bcrypt
+
