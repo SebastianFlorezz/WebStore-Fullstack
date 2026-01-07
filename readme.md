@@ -17,4 +17,7 @@
     -Dotenv
     -Prisma
     -Bcrypt
+    -JWT
+
+*Endpoint documentation cooming soon*
 
