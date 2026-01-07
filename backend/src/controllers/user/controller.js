@@ -44,12 +44,23 @@ const register = async (req, res) => {
     await prisma.$disconnect();
 
     return res.status(201).json({ 
-        message: "User registered successfully",  // need to change json responses
-        user: {
-            id: newUser.id, 
-            name: newUser.name, 
-            email: newUser.email} 
-        });    
+        status: "success",
+        timestamp: new Date().toISOString(),
+        data: {
+            user:{
+                userId: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                isVerified: false
+            },
+            tokens: {
+                access: "to be implemented",
+                refresh: "to be implemented",
+                expires_in: "to be implemented"
+            }},
+        meta: { version: "1.0.0" },
+        error: null
+    });    
 
     // add that when the user is created, he needs to verify his email address
     
