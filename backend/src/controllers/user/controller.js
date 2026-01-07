@@ -83,11 +83,68 @@ const register = async (req, res) => {
 };
 
 
+const login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // zod validations for email and password
+        // to be implemented
+
+        // user existence check 
+
+        const user = await prisma.User.findUnique({
+            where: { email }
+        });
+        
+        if (!user) {
+            return res.status(400).json({ message: "Invalid email or password" });
+        }
+
+        // password verification
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(400).json({ message: "Invalid email or password" });
+        }
+
+        // jwt token generation
+        const jwtPayload = {
+            userId: user.id,
+            name: user.name,
+            email: user.email
+        };
+
+        const accessToken = jwt.sign(jwtPayload, jwtSecret, { expiresIn: '1h' });
+    
+        // json response and http code
+        return res.status(200).json({ 
+            status: "success",
+            timestamp: new Date().toISOString(),
+            data: {
+                user:{
+                    userId: user.id,
+                    name: user.name,
+                    email: user.email,
+                    isVerified: false
+                },
+                tokens: {
+                    access: accessToken,
+                    refresh: "to be implemented",
+                    expires_in: "1h"
+                }},
+            meta: { version: "1.0.0" },
+            error: null
+        });
+    } catch (error) {
+        console.error("Error logging in user:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
 
 
 
 
 
 module.exports = {
-    register
+    register,
+    login
 }
