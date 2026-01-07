@@ -33,8 +33,8 @@ const register = async (req, res) => {
     // password encryptation
     const hashedpassword = await bcrypt.hash(password, 10)
 
-    // user creation in the database
 
+    // user creation in the database
     const newUser = await prisma.User.create({
         data: {
             name,
@@ -42,9 +42,19 @@ const register = async (req, res) => {
             password: hashedpassword
         }
     })
-
     await prisma.$disconnect();
 
+    //jwt token generation
+
+    const jwtPayload = {
+        userId: newUser.id,
+        name: newUser.name,
+        email: newUser.email
+    }
+
+    const accessToken = jwt.sign(jwtPayload, jwtSecret, { expiresIn: '1h' });
+
+    //json response and http code
     return res.status(201).json({ 
         status: "success",
         timestamp: new Date().toISOString(),
@@ -56,9 +66,9 @@ const register = async (req, res) => {
                 isVerified: false
             },
             tokens: {
-                access: "to be implemented",
+                access: accessToken,
                 refresh: "to be implemented",
-                expires_in: "to be implemented"
+                expires_in: "1h"
             }},
         meta: { version: "1.0.0" },
         error: null
@@ -71,6 +81,9 @@ const register = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" }); // need to change json responses 
   }
 };
+
+
+
 
 
 
