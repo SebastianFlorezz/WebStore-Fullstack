@@ -1,5 +1,7 @@
 const confirmPassword = require("../../utils/confirmPassword")
 const { PrismaClient} = require("@prisma/client")
+const jwt = require("jsonwebtoken")
+const jwtSecret = process.env.JWT_SECRET
 const prisma = new PrismaClient();
 const bcrypt = require("bcrypt");
 
