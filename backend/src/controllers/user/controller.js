@@ -142,6 +142,31 @@ const login = async (req, res) => {
 
 
 
+const updateUserName = async (req, res) => {
+    const { userId } = req.params;
+    const { name } = req.body;
+
+    if(isNaN(parseInt(userId))){
+        return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    if(req.user.userId !== parseInt(userId)){
+        return res.status(403).json({ message: "You are not authorized to update this user" });
+    }
+
+    try{
+        const updatedUser = await prisma.User.update({
+            where: { id: parseInt(userId) },
+            data: { name}
+        })
+    } catch (error){
+        console.error("Error updating user:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+
+
 
 
 module.exports = {
