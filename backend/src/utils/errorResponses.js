@@ -125,13 +125,13 @@ const internalServerError = (detail = "An unexpected error occurred") => {
 };
 
 
-const unauthorizedError = () => {
+const unauthorizedError = (detail = "Lacks of valid authentication credentials for the requested resource") => {
     return {
         errors: [
             {
                 status: "401",
                 title: "Unauthorized",
-                detail: "Authentication required"
+                detail: detail
             }
         ]
     };

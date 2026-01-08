@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken")
 const jwtSecret = process.env.JWT_SECRET
 const prisma = new PrismaClient();
 const bcrypt = require("bcrypt");
+const jsonErrorResponses = require("../../utils/errorResponses")
+
 
 
     //CHANGE ALL THE JSON RESPONSES
@@ -14,7 +16,7 @@ const register = async (req, res) => {
 
     // validate password confirmation
     if (!confirmPassword(password, passwordMatch)){
-        return res.status(400).json({ message: "Passwords do not match" });          
+        return res.json({ message: "Passwords do not match" });          
     }
 
     // put ZOD Validations for the inputs
@@ -27,7 +29,7 @@ const register = async (req, res) => {
     })
 
     if(existingUser){
-        return res.status(400).json({ message: "User already exists" });
+        return res.status(409).json(jsonErrorResponses.conflictError("Email already registered", "email"))
     }
 
     // password encryptation
@@ -78,7 +80,7 @@ const register = async (req, res) => {
     
   } catch (error){
     console.error("Error registering user:", error);
-    return res.status(500).json({ message: "Internal server error" }); // need to change json responses 
+    return res.status(500).json(jsonErrorResponses.internalServerError())
   }
 };
 
@@ -97,13 +99,13 @@ const login = async (req, res) => {
         });
         
         if (!user) {
-            return res.status(400).json({ message: "Invalid email or password" });
+            return res.status(401).json(jsonErrorResponses.unauthorizedError("Invalid email or password"));
         }
 
         // password verification
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(400).json({ message: "Invalid email or password" });
+            return res.status(401).json(jsonErrorResponses.unauthorizedError("Invalid email or password"));
         }
 
         // jwt token generation
@@ -136,7 +138,7 @@ const login = async (req, res) => {
         });
     } catch (error) {
         console.error("Error logging in user:", error);
-        return res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json(jsonErrorResponses.internalServerError());
     }
 }
 
@@ -147,11 +149,11 @@ const updateUserName = async (req, res) => {
     const { name } = req.body;
 
     if(isNaN(parseInt(userId))){
-        return res.status(400).json({ message: "Invalid user ID" });
+        return res.status(400).json(jsonErrorResponses.missingFieldsError("Unvalid user ID"));
     }
 
     if(req.user.userId !== parseInt(userId)){
-        return res.status(403).json({ message: "You are not authorized to update this user" });
+        return res.status(403).json(jsonErrorResponses.forbiddenError("You are not authorized to update this user"));
     }
 
     try{
@@ -161,7 +163,7 @@ const updateUserName = async (req, res) => {
         })
     } catch (error){
         console.error("Error updating user:", error);
-        return res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json(jsonErrorResponses.internalServerError());
     }
 }
 
